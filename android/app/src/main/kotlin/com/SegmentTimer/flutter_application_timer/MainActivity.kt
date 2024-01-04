@@ -1,4 +1,4 @@
-package com.SegmentTimer.flutter_application_timer
+package com.SegmentTimer.flutterapplicationtimer
 
 import io.flutter.embedding.android.FlutterActivity
 

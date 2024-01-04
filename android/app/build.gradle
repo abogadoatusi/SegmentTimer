@@ -32,7 +32,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.flutter_application_timer"
+    namespace "com.SegmentTimer.flutterapplicationtimer"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
