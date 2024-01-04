@@ -7,9 +7,16 @@ void main() => runApp(MyTeaApp());
 class MyTeaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // アプリケーション全体のテーマ設定を行います
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Segment Timer',
+      theme: ThemeData(
+        // ダークテーマを適用します
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blueGrey,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       home: TeaTimerScreen(),
     );
   }
@@ -40,6 +47,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    // タイマーの初期化を行います
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!_isPaused) {
         setState(() {
@@ -54,6 +62,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     _resetTimer();
   }
 
+  // セグメントごとのタイマーを開始します
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -69,6 +78,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     });
   }
 
+  // タイマーをリセットします
   void _resetTimer() {
     setState(() {
       _remainingTime = _teaSegments.isNotEmpty ? _teaSegments[0].duration : _totalTime;
@@ -78,20 +88,22 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     });
   }
 
+  // 次のセグメントに移動します
   void _moveToNextSegment() {
+    _playAudio(); // セグメントが終わるたびに音を鳴らします
     if (_currentSegmentIndex < _teaSegments.length - 1) {
       _currentSegmentIndex++;
       _remainingTime = _teaSegments[_currentSegmentIndex].duration;
       _startTimer();
     } else {
       _timer?.cancel();
-      _playAudio();
     }
   }
 
+  // 音声を再生します
   Future<void> _playAudio() async {
     try {
-      await _audioPlayer.setSource(AssetSource('assets/alarm.mp3'));
+      await _audioPlayer.setSource(AssetSource('alarm.mp3'));
       await _audioPlayer.resume();
       print('Audio played successfully');
     } catch (e) {
@@ -99,6 +111,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     }
   }
 
+  // 総時間を更新します
   void _updateTotalTime() {
     setState(() {
       if (_teaSegments.isNotEmpty) {
@@ -114,6 +127,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     _resetTimer();
   }
 
+  // セグメントを削除します
   void _removeSegment(int index) {
     setState(() {
       _teaSegments.removeAt(index);
@@ -121,6 +135,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     });
   }
 
+  // セグメントを編集します
   void _editSegment(int index) async {
     TextEditingController titleController = TextEditingController();
     TextEditingController durationController = TextEditingController();
@@ -134,6 +149,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
         return AlertDialog(
           title: Text('Edit Segment'),
           content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
@@ -160,8 +176,8 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
                 if (title.isNotEmpty && duration > 0) {
                   setState(() {
                     _teaSegments[index] = TeaSegment(title: title, duration: duration);
+                    _updateTotalTime();
                   });
-                  _updateTotalTime();
                 }
                 Navigator.of(context).pop();
               },
@@ -173,6 +189,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     );
   }
 
+  // セグメントの追加ダイアログを表示します
   Future<void> _showAddSegmentDialog() async {
     TextEditingController titleController = TextEditingController();
     TextEditingController durationController = TextEditingController();
@@ -183,6 +200,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
         return AlertDialog(
           title: Text('Add Segment'),
           content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
@@ -209,8 +227,8 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
                 if (title.isNotEmpty && duration > 0) {
                   setState(() {
                     _teaSegments.add(TeaSegment(title: title, duration: duration));
+                    _updateTotalTime();
                   });
-                  _updateTotalTime();
                 }
                 Navigator.of(context).pop();
               },
@@ -222,6 +240,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
     );
   }
 
+  // ポーズと再開の状態を切り替えます
   void _togglePausedState() {
     setState(() {
       _isPaused = !_isPaused;
@@ -230,6 +249,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // UIを構築します
     return Scaffold(
       appBar: AppBar(
         title: Text('Segment Timer'),
@@ -241,12 +261,19 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
           children: <Widget>[
             Text(
               _teaSegments.isNotEmpty ? _teaSegments[_currentSegmentIndex].title : 'Total Segment',
-              style: Theme.of(context).textTheme.headline5,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             SizedBox(height: 8.0),
             Text(
               '$_remainingTime seconds',
-              style: Theme.of(context).textTheme.headline4,
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.tealAccent[200],
+              ),
             ),
             SizedBox(height: 16.0),
             Row(
@@ -260,9 +287,7 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      _togglePausedState();
-                    });
+                    _togglePausedState();
                   },
                   child: Text(_isPaused ? 'Resume' : 'Pause'),
                 ),
@@ -277,35 +302,52 @@ class _TeaTimerScreenState extends State<TeaTimerScreen> {
             SizedBox(height: 16.0),
             Text(
               'Total Time: $_totalTime seconds',
-              style: Theme.of(context).textTheme.subtitle1,
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.tealAccent[100],
+              ),
             ),
             SizedBox(height: 16.0),
             Expanded(
               child: ListView.builder(
                 itemCount: _teaSegments.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(_teaSegments[index].title),
-                    subtitle: Text(
-                      '${_teaSegments[index].duration} seconds',
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            _editSegment(index);
-                          },
-                          child: Text('Edit'),
+                  return Card(
+                    color: Colors.blueGrey[800],
+                    child: ListTile(
+                      title: Text(
+                        _teaSegments[index].title,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        SizedBox(width: 8.0),
-                        ElevatedButton(
-                          onPressed: () {
-                            _removeSegment(index);
-                          },
-                          child: Text('Delete'),
+                      ),
+                      subtitle: Text(
+                        '${_teaSegments[index].duration} seconds',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.tealAccent[100],
                         ),
-                      ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              _editSegment(index);
+                            },
+                            child: Text('Edit'),
+                          ),
+                          SizedBox(width: 8.0),
+                          ElevatedButton(
+                            onPressed: () {
+                              _removeSegment(index);
+                            },
+                            child: Text('Delete'),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
