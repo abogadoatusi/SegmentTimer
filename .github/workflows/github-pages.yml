@@ -1,4 +1,3 @@
-
 name: github pages
 
 on:
@@ -24,7 +23,7 @@ jobs:
       - name: Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.5'
+          flutter-version: '3.16.'
           channel: 'stable'
           cache: true
       - run: flutter --version
